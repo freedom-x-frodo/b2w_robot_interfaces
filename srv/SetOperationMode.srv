@@ -1,0 +1,36 @@
+# Goal-level request to b2w_control's robot_mode_manager: "put the robot in this
+# operation mode." The manager works out the legal Sport API sequence, enforces the
+# interlocks, and verifies the result -- callers never touch SetRobotMode.
+#
+# This service returns as soon as the goal is ACCEPTED or REJECTED, not when the
+# transition finishes: standing up takes seconds. Watch the manager's status topic
+# (OperationModeStatus, ~/status -- /robot_mode_manager/status as launched today) for
+# the outcome: `transitioning` goes false, and `last_error` is empty on success or
+# carries the reason on failure. Gating on those two is more robust than watching
+# `current`, which also reads as the goal value when the robot was already there.
+#
+# These constants are the single source of truth for operation-mode values --
+# OperationModeStatus documents its fields as referring to them, and
+# b2w_control/mode_fsm.hpp static_asserts its enum against them.
+#
+# Both drive modes are WHEELED -- a B2W drives on its wheels in either gait. What differs
+# is the trade between straight-line speed and turning response.
+
+uint8 LIE_DOWN=0        # down with the motors HELD (sport mode 5) -- not the same as damped
+uint8 STAND=1           # up but hardware-immobile; Move is ignored (sport mode 6)
+uint8 DRIVE_CRUISE=2    # gait 0, sport mode 14 -- faster straight line, dampened yaw
+uint8 DRIVE_AGILE=3     # gait 1, sport mode 3  -- standard speed, responsive turning
+
+# 4 RETIRED: RECOVER. It existed only to issue RecoveryStand (API 1006), which is an
+#   aggressive self-right and has been removed from the stack -- see SetRobotMode. Getting
+#   up from a damped robot now goes through the ordinary StandUp path like any other goal.
+#   NEVER reuse this value: retired numbers stay retired so an old client cannot silently
+#   mean something new.
+
+uint8 mode
+---
+# accepted == false means nothing was sent to the robot. Common reasons:
+#   unknown target, no fresh BaseControllerStatus, an uncharacterised sport mode,
+#   the robot is moving (interlock), or a leg-reconfiguring command is still in flight.
+bool accepted
+string message

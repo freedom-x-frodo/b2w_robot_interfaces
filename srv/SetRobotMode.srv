@@ -1,0 +1,31 @@
+# Discrete posture / gait commands for the Unitree B2W, routed through the
+# Sport API by b2w_base_controller. Velocity is NOT here -- that streams over
+# /cmd_vel. This service is for the occasional "change what state I'm in" command.
+#
+# This is the RAW hardware surface: one request, one Sport API call, no sequencing and no
+# interlocks. Prefer SetOperationMode on b2w_control's robot_mode_manager, which knows the
+# legal transition graph and refuses illegal or unsafe requests. This service stays public
+# for bring-up and debugging.
+#
+# Command values are a stable wire contract. Retired numbers are never reused.
+
+uint8 STAND_UP=0        # API 1004 - smooth stand up (lying mode 5 -> lock standing mode 6)
+uint8 STAND_DOWN=1      # API 1005 - smooth lie down (-> mode 5)
+
+# 2 RETIRED: RECOVERY_STAND (API 1006). An aggressive, rapid self-right. Removed
+#   deliberately: StandUp (1004) reaches the same standing state smoothly, and nothing in
+#   this stack should be able to make the robot snap upright. NEVER reuse this value.
+# 3 RETIRED: BALANCE_STAND (API 1002). Measured on this B2W to leave SportModeState.mode
+#   unchanged -- in wheeled sport it does nothing observable. A command that silently does
+#   nothing is worse than no command at all. NEVER reuse this value.
+
+uint8 GAIT_CRUISE=4     # API 1011 data=0 - gait 0 (mode 14, faster linear, dampened yaw)
+uint8 GAIT_AGILE=5      # API 1011 data=1 - gait 1 (mode 3, responsive turning)
+uint8 STOP_MOVE=6       # API 1003 - graceful stop, zeroes the velocity setpoint
+uint8 DAMP=7            # API 1001 - DANGER: all motors off, robot drops. Deliberate use only.
+
+uint8 command
+---
+bool success
+string message
+uint8 resulting_mode    # SportModeState.mode observed shortly after (best-effort, 255=unknown)
