@@ -16,7 +16,9 @@
 # Both drive modes are WHEELED -- a B2W drives on its wheels in either gait. What differs
 # is the trade between straight-line speed and turning response.
 
-uint8 LIE_DOWN=0        # down with the motors HELD (sport mode 5) -- not the same as damped
+uint8 LIE_DOWN=0        # down with the motors HELD -- not the same as damped. Settles in
+                        # sport mode 7; mode 5 is only a ~1 s transient mid-descent
+                        # (measured 2026-07-29, see docs/control-layer.md)
 uint8 STAND=1           # up but hardware-immobile; Move is ignored (sport mode 6)
 uint8 DRIVE_CRUISE=2    # gait 0, sport mode 14 -- faster straight line, dampened yaw
 uint8 DRIVE_AGILE=3     # gait 1, sport mode 3  -- standard speed, responsive turning

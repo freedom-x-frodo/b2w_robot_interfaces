@@ -9,8 +9,9 @@
 #
 # Command values are a stable wire contract. Retired numbers are never reused.
 
-uint8 STAND_UP=0        # API 1004 - smooth stand up (lying mode 5 -> lock standing mode 6)
-uint8 STAND_DOWN=1      # API 1005 - smooth lie down (-> mode 5)
+uint8 STAND_UP=0        # API 1004 - smooth stand up (lying mode 7 -> lock standing mode 6)
+uint8 STAND_DOWN=1      # API 1005 - smooth lie down (settles in mode 7; mode 5 is a ~1 s
+                        # transient mid-descent, measured 2026-07-29 -- control-layer.md)
 
 # 2 RETIRED: RECOVERY_STAND (API 1006). An aggressive, rapid self-right. Removed
 #   deliberately: StandUp (1004) reaches the same standing state smoothly, and nothing in
