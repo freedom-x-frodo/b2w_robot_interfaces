@@ -10,6 +10,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/OperationModeStatus.msg"
   "srv/SetRobotMode.srv"
   "srv/SetOperationMode.srv"
+  "srv/SelectCamera.srv"
   DEPENDENCIES std_msgs
 )
 

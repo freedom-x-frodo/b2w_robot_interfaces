@@ -1,0 +1,23 @@
+# Ask camera_switch (b2w_bringup) to make one USB camera the active one.
+#
+# WHY THIS IS A SERVICE AND NOT A PARAMETER
+# The two USB cameras on the B2W physically CANNOT stream at the same time. Both Sunplus
+# 1bcf:2cd1 negotiate VideoStreaming alt setting 11 (3x1020 = 3060 B/microframe) whatever
+# resolution you ask for, and USB 2.0 caps periodic transfers at 80% of a 7500 B
+# microframe = 6000 B. Two of them need 6120 B, so the second VIDIOC_STREAMON returns
+# ENOSPC. Measured on .164 2026-09-15 at every MJPEG profile from 1280x720 to 320x240.
+#
+# So selecting a camera is not a setting, it is a SEQUENCE: stop the running driver, wait
+# for the USB bandwidth to actually come back, start the other one, confirm it streams.
+# That can fail halfway, and a caller needs to know -- hence success/message rather than a
+# parameter write that cannot report anything.
+#
+# This call BLOCKS until the new camera is streaming or the switch has failed and the
+# previous camera has been put back. Expect it to take a second or two.
+
+string camera           # camera name as configured in camera_switch (e.g. "front", "rear")
+---
+bool success
+string message          # on failure: what went wrong, and what is streaming instead
+string active           # camera actually streaming when this call returned. On failure
+                        # this is the camera that was restored, or "" if none could be.
